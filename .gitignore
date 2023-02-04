@@ -1,0 +1,9 @@
+**config**
+.ideia
+**target**
+/config/TokenSecret
+config
+.config
+/ideia
+/.idea
+.env
