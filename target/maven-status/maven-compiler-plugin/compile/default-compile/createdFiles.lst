@@ -1,0 +1,6 @@
+pepperoni\bot\events\ReadyEventListener.class
+pepperoni\bot\Main.class
+pepperoni\bot\config\TokenSecret.class
+pepperoni\bot\events\InteractionEventListener.class
+pepperoni\bot\modules\OffendApi.class
+pepperoni\bot\events\MessageEventListener.class
