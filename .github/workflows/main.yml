@@ -6,43 +6,41 @@ on:
       - main
 
 env:
-  PATH_APP: /opt
-  PATH_APP2: /opt/pepperoni-bot
-  SSH_PRIVATE_KEY: ${{ secrets.SSHKEY }}
-  SSH_PORT: 22
-  SERVER: ${{ secrets.HOST }}
-  
+  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
 jobs:
   deploy:
-    runs-on: ubuntu-18.04
-    
+    runs-on: ubuntu-latest
+
     steps:
-    - name: Check Java version
-      run: |
-          java -version
-          echo $?
-    - name: Install Java
-      if: steps.check-java.output != '0'
-      run: |
-          sudo apt-get update
-          sudo apt-get install -y openjdk-11-jdk git
-          sudo update-alternatives --config java
-          sudo update-alternatives --config javac
-    - name: Git clone or pull
-      env:
-          SSHPASS:  ${{ secrets.PASSOWORD }}
-      run: |
-          set +e
-          sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER -p $SSH_PORT "if [ -d $PATH_APP ]; then rm -rf $PATH_APP; fi; git clone git@github.com:gamartins013/pepperoni-bot.git $PATH_APP"
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup SSH
+      uses: shivammathur/setup-ssh-action@v1
+      with:
+        ssh-private-key: ${{ env.SSH_PRIVATE_KEY }}
+
+    - name: SSH Connection
+      uses: appleboy/ssh-action@main
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ env.SSH_PRIVATE_KEY }}
+        script: |
           set -e
-   
-    - name: Build with Maven
-      run: |
-          cd $PATH_APP2
+          echo "Starting Deployment"
+          cd /opt
+          git clone ${{ secrets.GIT_REPOSITORY }}
+          cd ${{ secrets.APP_NAME }}
           mvn clean install
-    - name: Connect to Server
-      run: |
-          ssh -o StrictHostKeyChecking=no $SERVER  -p $SSH_PORT << EOF
+          java -cp target/classes Main
 
-
+    - name: Deploy
+      uses: ad-m/github-push-action@main
+      with:
+        ssh_key: ${{ env.SSH_PRIVATE_KEY }}
+        branch: master
+        git_user: ${{ secrets.GIT_USERNAME }}
+        host: ${{ secrets.VPS_HOST }}
+        repo: ${{ secrets.APP_NAME }}
