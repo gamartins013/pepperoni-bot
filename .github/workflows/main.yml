@@ -5,28 +5,42 @@ on:
     branches:
       - main
 
+env:
+  SSH_PRIVATE_KEY: ${{ secrets.SSHKEY }}
+
 jobs:
-  build:
-    runs-on: ubunto-latest
-    
+  deploy:
+    runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v1
-    
-    - name: Copy Repository Contents Via SCP
-    - uses: appleboy/scp-action@main
-      env:
-        HOST: ${{ secrets.HOST }}
-        USERNAME: ${{ secrets.USERNAME }}
-        PORT: ${{ secrets.PORT }}
-        KEY: ${{ secrets.SSHKEY }}
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup SSH
+      uses: gamartins013/setup-ssh-action@v1
       with:
-        source: "."
-        target: "/opt/"
-    - name: Executing remote command
-      uses: appleboy/ssh-action@main
+        ssh-private-key: ${{ env.SSH_PRIVATE_KEY }}
+
+    - name: SSH Connection
+      uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST }}
-        USERNAME: ${{ secrets.USERNAME }}
-        PORT: ${{ secrets.PORT }}
-        KEY: ${{ secrets.SSHKEY }}
-        script: ls
+        username: ${{ secrets.USERNAME }}
+        key: ${{ env.SSH_PRIVATE_KEY }}
+        script: |
+          set -e
+          echo "Starting Deployment"
+          cd /opt
+          git clone ${{ secrets.GIT_REPOSITORY }}
+          cd ${{ secrets.APP_NAME }}
+          mvn clean install
+          java -cp target/classes Main
+
+    - name: Deploy
+      uses: ad-m/github-push-action@master
+      with:
+        ssh_key: ${{ env.SSH_PRIVATE_KEY }}
+        branch: master
+        git_user: ${{ secrets.GIT_USERNAME }}
+        host: ${{ secrets.HOST }}
+        repo: ${{ secrets.APP_NAME }}
