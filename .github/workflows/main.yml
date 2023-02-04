@@ -36,8 +36,7 @@ jobs:
           sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER -p $SSH_PORT "if [ -d $PATH_APP ]; then rm -rf $PATH_APP; fi; git clone git@github.com:gamartins013/pepperoni-bot.git $PATH_APP"
           set -e
     - name: Verify directory
-      run: |
-          ssh -o StrictHostKeyChecking=no $SERVER -p $SSH_PORT "if [ ! -d $PATH_APP ]; then mkdir -p $PATH_APP; fi"
+      run: ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY $SERVER -p $SSH_PORT "if [ ! -d $PATH_APP ]; then mkdir -p $PATH_APP; fi"
     - name: Build with Maven
       run: |
           cd $PATH_APP
