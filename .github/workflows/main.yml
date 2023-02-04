@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  PATH_APP: /opt/pepperoni-bot
+  PATH_APP: /opt
   SSH_PRIVATE_KEY: ${{ secrets.SSHKEY }}
   SSH_PORT: 22
   SERVER: ${{ secrets.HOST }}
