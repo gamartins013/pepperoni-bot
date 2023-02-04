@@ -12,8 +12,6 @@ env:
   SERVER: ${{ secrets.HOST }}
   
 
-
-
 jobs:
   deploy:
     runs-on: ubuntu-18.04
@@ -30,15 +28,13 @@ jobs:
           sudo apt-get install -y openjdk-11-jdk git
           sudo update-alternatives --config java
           sudo update-alternatives --config javac
-  
-
     - name: Git clone or pull
       env:
-          SSHPASS: ${{ env.SSH_PRIVATE_KEY  }}
+          SSHPASS: ${{ env.SSH_PRIVATE_KEY }}
       run: |
-            set +e
-            - sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER -p $SSH_PORT "if [ -d $PATH_APP ]; then rm -rf $PATH_APP; fi; git clone git@github.com:gamartins013/pepperoni-bot.git $PATH_APP"
-            shell: /bin/bash -e {0}
+          set +e
+          sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER -p $SSH_PORT "if [ -d $PATH_APP ]; then rm -rf $PATH_APP; fi; git clone git@github.com:gamartins013/pepperoni-bot.git $PATH_APP"
+          set -e
     - name: Verify directory
       run: |
           ssh -o StrictHostKeyChecking=no $SERVER  -p $SSH_PORT "if [ ! -d $PATH_APP ]; then mkdir -p $PATH_APP; fi"
