@@ -37,7 +37,7 @@ jobs:
           set -e
     - name: Verify directory
       run: |
-          ssh -o StrictHostKeyChecking=no $SERVER  -p $SSH_PORT "if [ ! -d $PATH_APP ]; then mkdir -p $PATH_APP; fi"
+          ssh -o StrictHostKeyChecking=no $SERVER -p $SSH_PORT "if [ ! -d $PATH_APP ]; then mkdir -p $PATH_APP; fi"
     - name: Build with Maven
       run: |
           cd $PATH_APP
