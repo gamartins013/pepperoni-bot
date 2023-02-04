@@ -29,11 +29,10 @@ public class Main {
                         new InteractionEventListener())
                 .build();
 
-        jda.upsertCommand("ping", "É a porra de um comando que retorna pong").setGuildOnly(true).queue();
-        jda.upsertCommand("macinfo", "Informacoes sobre o merchant Mac").setGuildOnly(true).queue();
-        jda.upsertCommand("offend", "Vai soltar umas ofensas aleatórias ").setGuildOnly(true).queue();
+        jda.upsertCommand("ping", "e a porra de um comando que retorna pong").setGuildOnly(true).queue();
+        jda.upsertCommand("offend", "Vai soltar umas ofensas aleatorias ").setGuildOnly(true).queue();
         jda.updateCommands().addCommands(
-                Commands.slash("ban", "Poderá banir alguem caso precise")
+                Commands.slash("ban", "Podera banir alguem caso precise")
                         .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.BAN_MEMBERS))
                         .setGuildOnly(true)
                         .addOption(OptionType.USER, "user", "Nome do usuario para banir", true)
