@@ -6,41 +6,43 @@ on:
       - main
 
 env:
+  PATH_APP: /opt/pepperoni-bot
   SSH_PRIVATE_KEY: ${{ secrets.SSHKEY }}
+
+
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-18.04
+    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    - name: Check Java version
+      run: |
+          java -version
+          echo $?
+    - name: Install Java
+      if: steps.check-java.output != '0'
+      run: |
+          sudo apt-get update
+          sudo apt-get install -y openjdk-11-jdk git
+          sudo update-alternatives --config java
+          sudo update-alternatives --config javac
+  
 
-    - name: Setup SSH
-      uses: gamartins013/pepperoni-bot@v1
-      with:
-        ssh-private-key: ${{ env.SSH_PRIVATE_KEY }}
-
-    - name: SSH Connection
-      uses: gamartins013/ssh-action@main
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ env.SSH_PRIVATE_KEY }}
-        script: |
-          set -e
-          echo "Starting Deployment"
-          cd /opt
-          git clone ${{ secrets.GIT_REPOSITORY }}
-          cd ${{ secrets.APP_NAME }}
+    - name: Git clone or pull
+      env:
+          SSHPASS: ${{ env.SSH_PRIVATE_KEY  }}
+      run: |
+          sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER -p ${{ env.PORT }}T "if [ -d $PATH_APP ]; then rm -rf $PATH_APP; fi; git clone git@github.com:gamartins013/pepperoni-bot.git $PATH_APP"
+    - name: Verify directory
+      run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.HOST }} -p ${{ env.PORT }} "if [ ! -d $PATH_APP ]; then mkdir -p $PATH_APP; fi"
+    - name: Build with Maven
+      run: |
+          cd $PATH_APP
           mvn clean install
-          java -cp target/classes Main
+    - name: Connect to Server
+      run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.HOST }} -p ${{ env.PORT }} << EOF
 
-    - name: Deploy
-      uses: ad-m/github-push-action@main
-      with:
-        ssh_key: ${{ env.SSH_PRIVATE_KEY }}
-        branch: master
-        git_user: ${{ secrets.GIT_USERNAME }}
-        host: ${{ secrets.HOST }}
-        repo: ${{ secrets.APP_NAME }}
+
