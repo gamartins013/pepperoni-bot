@@ -8,6 +8,9 @@ on:
 env:
   PATH_APP: /opt/pepperoni-bot
   SSH_PRIVATE_KEY: ${{ secrets.SSHKEY }}
+  SSH_PORT: 22
+  SERVER: ${{ secrets.HOST }}
+  
 
 
 
@@ -33,16 +36,16 @@ jobs:
       env:
           SSHPASS: ${{ env.SSH_PRIVATE_KEY  }}
       run: |
-          sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER -p ${{ env.PORT }}T "if [ -d $PATH_APP ]; then rm -rf $PATH_APP; fi; git clone git@github.com:gamartins013/pepperoni-bot.git $PATH_APP"
+           - sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER -p $SSH_PORT "if [ -d $PATH_APP ]; then rm -rf $PATH_APP; fi; git clone git@github.com:gamartins013/pepperoni-bot.git $PATH_APP"
     - name: Verify directory
       run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.HOST }} -p ${{ env.PORT }} "if [ ! -d $PATH_APP ]; then mkdir -p $PATH_APP; fi"
+          ssh -o StrictHostKeyChecking=no $SERVER  -p $SSH_PORT "if [ ! -d $PATH_APP ]; then mkdir -p $PATH_APP; fi"
     - name: Build with Maven
       run: |
           cd $PATH_APP
           mvn clean install
     - name: Connect to Server
       run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.HOST }} -p ${{ env.PORT }} << EOF
+          ssh -o StrictHostKeyChecking=no $SERVER  -p $SSH_PORT << EOF
 
 
