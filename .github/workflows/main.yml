@@ -17,7 +17,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Setup SSH
-      uses: shivammathur/setup-ssh-action@v1
+      uses: gamartins013/pepperoni-bot@v1
       with:
         ssh-private-key: ${{ env.SSH_PRIVATE_KEY }}
 
