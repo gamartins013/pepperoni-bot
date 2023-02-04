@@ -1,46 +1,20 @@
-name: Deploy Java Application
-
 on:
   push:
     branches:
       - main
-
-env:
-  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-
+name: 🚀 Deploy website on push
 jobs:
-  deploy:
+  web-deploy:
+    name: 🎉 Deploy
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v2
 
-    - name: Setup SSH
-      uses: gamartins013/pepperoni-bot@v1
-      with:
-        ssh-private-key: ${{ env.SSH_PRIVATE_KEY }}
-
-    - name: SSH Connection
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USERNAME }}
-        key: ${{ env.SSH_PRIVATE_KEY }}
-        script: |
-          set -e
-          echo "Starting Deployment"
-          cd /opt
-          git clone ${{ secrets.GIT_REPOSITORY }}
-          cd ${{ secrets.APP_NAME }}
-          mvn clean install
-          java -cp target/classes Main
-
-    - name: Deploy
-      uses: ad-m/github-push-action@master
-      with:
-        ssh_key: ${{ env.SSH_PRIVATE_KEY }}
-        branch: master
-        git_user: ${{ secrets.GIT_USERNAME }}
-        host: ${{ secrets.VPS_HOST }}
-        repo: ${{ secrets.APP_NAME }}
+      - name: 📂 Sync files
+        uses: SamKirkland/FTP-Deploy-Action@4.0.0
+        with:
+          server: ${{ secrets.ftp_host }}
+          username: ${{ secrets.ftp_user }}
+          password: ${{ secrets.ftp_password }}
+          server-dir: /opt/pepperoni-bot
