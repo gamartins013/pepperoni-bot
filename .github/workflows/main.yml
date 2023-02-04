@@ -5,16 +5,28 @@ on:
     branches:
       - main
 
-env:
-  PATH_APP: /opt/pepperoni-bot
-
-
 jobs:
-  deploy:
-    runs-on: ubuntu-18.04
+  build:
+    runs-on: ubunto-latest
     
     steps:
-    - name: Build with Maven
-      run: |
-        cd $PATH_APP
-        mvn clean install
+    - uses: actions/checkout@v1
+    
+    - name: Copy Repository Contents Via SCP
+    - uses: appleboy/scp-action@main
+      env:
+        HOST: ${{ secrets.HOST }}
+        USERNAME: ${{ secrets.USERNAME }}
+        PORT: ${{ secrets.PORT }}
+        KEY: ${{ secrets.SSHKEY }}
+      with:
+        source: "."
+        target: "/opt/"
+    - name: Executing remote command
+      uses: appleboy/ssh-action@main
+      with:
+        host: ${{ secrets.HOST }}
+        USERNAME: ${{ secrets.USERNAME }}
+        PORT: ${{ secrets.PORT }}
+        KEY: ${{ secrets.SSHKEY }}
+        script: ls
