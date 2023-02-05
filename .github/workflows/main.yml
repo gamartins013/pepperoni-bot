@@ -5,14 +5,9 @@ on:
     branches:
       [ "main" ]
 
-env:
-  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-  HOST: ${{ secrets.HOST_NAME }}
-  USERNAME: ${{ secrets.USERNAME }}
-  PASSWORD: ${{ secrets.PASSWORD }}
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: self-hosted
     
     steps:
     - name: Checkout code
@@ -28,23 +23,6 @@ jobs:
     - name: Build with Maven
       run: mvn -B package --file pom.xml
       
-    - name: Copy files over SSH
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.HOST_NAME }}
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.PASSWORD }}
-        key: ${{ env.SSH_PRIVATE_KEY }}
-        source: target/*.jar
-        target: ~/pepperoni-bot-1.0-SNAPSHOT.jar
-        
-    - name: Run Remote Command
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.HOST_NAME }}
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.PASSWORD }}
-        key: ${{ env.SSH_PRIVATE_KEY }}
-        script: |
-          cd ~/
-          java -jar pepperoni-bot-1.0-SNAPSHOT.jar
+    
+      
+ 
