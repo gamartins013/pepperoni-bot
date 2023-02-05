@@ -39,7 +39,7 @@ jobs:
         target: ~/pepperoni-bot-1.0-SNAPSHOT.jar
         
     - name: Run Remote Command
-      uses: appleboy/ssh-action@v1
+      uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST_NAME }}
         username: ${{ secrets.USERNAME }}
