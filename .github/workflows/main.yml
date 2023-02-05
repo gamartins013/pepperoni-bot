@@ -1,4 +1,4 @@
-name: 🚀 Deploy Java Application on Prod
+name: 🚀 Deploy Maven Application on Prod
 
 on:
   push:
@@ -6,39 +6,46 @@ on:
       [ "main" ]
 
 env:
-  IP: ${{ secrets.HOST_NAME }}
-  USERNAME: ${{ secrets.USERNAME }}
+  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Java
-        uses: actions/setup-java@v2
-        with:
-          java-version: 11
-
-      - name: Build with Maven
-        run: mvn package
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: pepperoni-bot-1.0-SNAPSHOT.jar
-          path: target/pepperoni-bot-1.0-SNAPSHOT.jar
-
-      - name: Deploy to VPS
-        uses: actions/ssh-action@v1
-        with:
-          host: ${{ env.IP }}
-          username: ${{ env.USERNAME }}
-          password: ${{ secrets.VPS_PRIVATE_KEY }}
-          script: |
-            sudo systemctl stop Main
-            sudo rm /home/pepperoni-bot/pepperoni-bot-1.0-SNAPSHOT.jar
-            sudo scp -o StrictHostKeyChecking=no $(System.ArtifactDirectory)/pepperoni-bot-1.0-SNAPSHOT.jar {{ env.USERNAME }}@{{ env.IP }}:/home/pepperoni-bot/pepperoni-bot-1.0-SNAPSHOT.jar
-            sudo systemctl start Main
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Set up Java
+      uses: actions/setup-java@v2
+      with:
+        java-version: 11
+      
+    - name: Build with Maven
+      uses: maven-actions/setup-maven@v2
+      with:
+        maven-version: 3.6.3
+        
+    - name: Package with Maven
+      run: mvn clean package
+      
+    - name: Copy files over SSH
+      uses: appleboy/scp-action@v1
+      with:
+        host: ${{ secrets.HOST_NAME }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        key: ${{ env.SSH_PRIVATE_KEY }}
+        source: target/*.jar
+        target: ~/pepperoni-bot-1.0-SNAPSHOT.jar
+        
+    - name: Run Remote Command
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ secrets.HOST_NAME }}
+        username: ${{ secrets.PUSERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        key: ${{ env.SSH_PRIVATE_KEY }}
+        script: |
+          cd ~/
+          java -jar pepperoni-bot-1.0-SNAPSHOT.jar
