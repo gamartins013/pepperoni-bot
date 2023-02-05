@@ -25,21 +25,20 @@ jobs:
       - name: Build with Maven
         run: mvn package
 
-      - name: Deploy to VPS
-        uses: appleboy/scp-action@v1
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
         with:
-          host: ${{ env.IP }}
-          username: ${{ env.USERNAME }}
-          private_key: ${{ secrets.VPS_PRIVATE_KEY }}
-          source: target/pepperoni-bot-1.0-SNAPSHOT.jar
-          target: target/pepperoni-bot-1.0-SNAPSHOT.jar
-          scp_args: -o StrictHostKeyChecking=no
+          name: pepperoni-bot-1.0-SNAPSHOT.jar
+          path: target/pepperoni-bot-1.0-SNAPSHOT.jar
 
-      - name: Restart application
-        uses: appleboy/ssh-action@v1
+      - name: Deploy to VPS
+        uses: actions/ssh-action@v1
         with:
           host: ${{ env.IP }}
           username: ${{ env.USERNAME }}
-          private_key: ${{ secrets.PROD_VPS_PRIVATE_KEY }}
+          password: ${{ secrets.VPS_PRIVATE_KEY }}
           script: |
-            sudo systemctl restart Main
+            sudo systemctl stop Main
+            sudo rm /home/pepperoni-bot/pepperoni-bot-1.0-SNAPSHOT.jar
+            sudo scp -o StrictHostKeyChecking=no $(System.ArtifactDirectory)/pepperoni-bot-1.0-SNAPSHOT.jar {{ env.USERNAME }}@{{ env.IP }}:/home/pepperoni-bot/pepperoni-bot-1.0-SNAPSHOT.jar
+            sudo systemctl start Main
