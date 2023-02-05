@@ -21,7 +21,7 @@ public class Main {
 
         JDABuilder jdaBuilder = JDABuilder.createDefault(token.getToken());
 
-        JDA jda = jdaBuilder.setActivity(Activity.playing("curioso ne"))
+        JDA jda = jdaBuilder.setActivity(Activity.playing("em desenvolvimento"))
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES)
                 .addEventListeners(
                         new ReadyEventListener(),
