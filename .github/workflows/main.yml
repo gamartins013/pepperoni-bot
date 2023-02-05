@@ -1,20 +1,45 @@
+name: 🚀 Deploy Java Application on Prod
+
 on:
   push:
     branches:
-      - main
-name: 🚀 Deploy website on push
-jobs:
-  web-deploy:
-    name: 🎉 Deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: 🚚 Get latest code
-        uses: actions/checkout@v2
+      [ "main" ]
 
-      - name: 📂 Sync files
-        uses: SamKirkland/FTP-Deploy-Action@4.0.0
-        with:
-          server: ${{ secrets.ftp_host }}
-          username: ${{ secrets.ftp_user }}
-          password: ${{ secrets.ftp_password }}
-          server-dir: /opt/pepperoni-bot/
+jobs:
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+
+    - name: Build and Package Application
+      run: |
+        mvn package
+
+    - name: Copy files to VPS
+      uses: appleboy/scp-action@main
+      with:
+        host: ${{ secrets.HOST_NAME }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.VPS_PRIVATE_KEY }}
+        source: target/<your_jar_file>.jar
+        target: /home/${{ secrets.USERNAME }}/pepperoni-bot-1.0-SNAPSHOT.jar
+
+    - name: SSH into VPS
+      uses: appleboy/ssh-action@main
+      with:
+        host: ${{ secrets.HOST_NAME }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.VPS_PRIVATE_KEY }}
+        script: |
+          sudo systemctl stop Main
+          sudo rm /home/${{ secrets.USERNAME }}/pepperoni-bot-1.0-SNAPSHOT.jar
+          sudo mv /home/${{ secrets.USERNAME }}/pepperoni-bot-1.0-SNAPSHOT.jar /usr/local/Main/pepperoni-bot-1.0-SNAPSHOT.jar
+          sudo systemctl start Main
