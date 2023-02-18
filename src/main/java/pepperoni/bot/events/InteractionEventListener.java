@@ -31,33 +31,7 @@ public class InteractionEventListener extends ListenerAdapter {
                     throw new RuntimeException(e);
                 }
                 break;
-            case "ban":
-                if (!Objects.requireNonNull(event.getMember()).hasPermission(Permission.BAN_MEMBERS)) {
-                    event.reply("Rapaz você é menino não pode banir membros").queue();
-                    break;
-                }
-                User target = event.getOption("user", OptionMapping::getAsUser);
 
-                Member member = event.getOption("user", OptionMapping::getAsMember);
-                assert member != null;
-                if (!event.getMember().canInteract(member)) {
-                    event.reply("Esse cara ai não vai dar pra banir não em").queue();
-                    break;
-                }
-
-                event.deferReply().queue();
-                String reason = event.getOption("reason", OptionMapping::getAsString);
-                assert target != null;
-                AuditableRestAction<Void> action = Objects.requireNonNull(event.getGuild()).ban(target, 0, TimeUnit.NANOSECONDS);
-                if (reason != null)
-                    action = action.reason(reason);
-                action.queue(v -> {
-                    event.getHook().editOriginal("" + target.getAsTag() + " foi ** banido ** por " + event.getUser().getAsTag() + "!").queue();
-                }, error -> {
-                    event.getHook().editOriginal("Deu ruim ai cara tenta dnv").queue();
-                    error.printStackTrace();
-                });
-                break;
 
         }
 

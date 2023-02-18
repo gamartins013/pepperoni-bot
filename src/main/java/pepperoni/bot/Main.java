@@ -31,13 +31,6 @@ public class Main {
 
         jda.upsertCommand("ping", "e a porra de um comando que retorna pong").setGuildOnly(true).queue();
         jda.upsertCommand("offend", "Vai soltar umas ofensas aleatorias ").setGuildOnly(true).queue();
-        jda.updateCommands().addCommands(
-                Commands.slash("ban", "Podera banir alguem caso precise")
-                        .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.BAN_MEMBERS))
-                        .setGuildOnly(true)
-                        .addOption(OptionType.USER, "user", "Nome do usuario para banir", true)
-                        .addOption(OptionType.STRING, "reason", "Motivo do banimento")
-        ).queue();
     }
 
 
